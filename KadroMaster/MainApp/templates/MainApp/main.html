@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление сотрудниками</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header {
+            background-color: #FFB300;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .header .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            padding: 5px;
+            font-size: 16px;
+        }
+        .search-box button {
+            padding: 5px 15px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .search-box button:hover {
+            background-color: #E59400;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .actions button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .actions button:hover {
+            background-color: #E59400;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .logout {
+            background-color: #FFB300;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .logout:hover {
+            background-color: #E59400;
+        }
+        .search-box button {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu">
+            <label>КадроМастер</label>
+            <a href="">Добавить сотрудника</a>
+            <a href="">Добавить отдел</a>
+            <a href="">Добавление должности</a>
+            <a href="">Управление доступами</a>
+        </div>
+        <form method="post" action="">
+            <button class="logout" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" placeholder="ФИО">
+            <input type="text" placeholder="Таб. номер">
+            <button>Найти</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>ФИО</th>
+                    <th>Таб номер</th>
+                    <th>Пол</th>
+                    <th>Дата рождения</th>
+                    <th>Телефон</th>
+                    <th>Дата приёма</th>
+                    <th>Информация</th>
+                    <th>Отчёт ЗП</th>
+                    <th>Увольнение</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><button type="submit" onclick="location.href=''">Инфо</button></td>
+                    <td><button type="submit" onclick="location.href=''">Отчёт ЗП</button></td>
+                    <td><button type="submit" onclick="location.href=''">Уволить</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
