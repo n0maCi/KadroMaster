@@ -4,6 +4,8 @@ from MainApp.models import *
 from MainApp.forms import *
 
 def profile_hr(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
     return render(request, 'MainApp/main.html')
 
 def auth_hr(request):
@@ -17,13 +19,12 @@ def auth_hr(request):
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
+            print(user)
             if user is not None:
                 login(request, user)
-                next_url = request.GET.get('next', 'profile')
-                return redirect(next_url)
+                return redirect('profile')
             else:
                 error_message = "Неправильный пароль!"
-                return render(request, 'MainApp/login.html', {'form': form, 'error_message': error_message, 'users': users})
-    else:
-        form = LoginForm()
-    return render(request, 'MainApp/login.html', {'form': form, 'users': users})
+                return render(request, 'MainApp/login.html', {'error_message': error_message, 'users': users})
+
+    return render(request, 'MainApp/login.html', {'users': users})
