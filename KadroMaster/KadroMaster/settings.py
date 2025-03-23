@@ -17,7 +17,7 @@ from configparser import ConfigParser
 CURRENT_DIR = Path(__file__).resolve().parent
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-config = ConfigParser()
+config = ConfigParser(interpolation=None)
 config.read(CURRENT_DIR / 'settings.ini/')
 
 # Quick-start development settings - unsuitable for production
