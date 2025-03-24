@@ -110,7 +110,9 @@
             <a href="">Добавление должности</a>
             <a href="">Управление доступами</a>
         </div>
-        <form method="post" action="">
+        <form method="post" action="{% url 'logout' %}?next=/">
+            {{ user.username }}
+            {% csrf_token %}
             <button class="logout" type="submit">Выйти</button>
         </form>
     </div>
