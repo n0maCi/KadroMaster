@@ -138,18 +138,24 @@
                 </tr>
             </thead>
             <tbody>
+                {% for employeer in employeers %}
                 <tr>
+                    <td>{{ employeer.id }}</td>
+                    <td>{{ employeer.fullname }}</td>
                     <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    {% if employeer.gender == 'm' %}
+                    <td>Мужчина</td>
+                    {% else %}
+                    <td>Женщина</td>
+                    {% endif %}
+                    <td>{{ employeer.birthday }}</td>
+                    <td>{{ employeer.phone }}</td>
+                    <td>{{ employeer.employment_date }}</td>
                     <td><button type="submit" onclick="location.href=''">Инфо</button></td>
                     <td><button type="submit" onclick="location.href=''">Отчёт ЗП</button></td>
                     <td><button type="submit" onclick="location.href=''">Уволить</button></td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

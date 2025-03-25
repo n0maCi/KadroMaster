@@ -4,9 +4,10 @@ from MainApp.models import *
 from MainApp.forms import *
 
 def profile_hr(request):
+    employeers = Employees.objects.all()
     if not request.user.is_authenticated:
         return redirect("login")
-    return render(request, 'MainApp/main.html')
+    return render(request, 'MainApp/main.html', {'employeers': employeers})
 
 def auth_hr(request):
     if request.user.is_authenticated:
