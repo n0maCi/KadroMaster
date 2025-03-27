@@ -151,9 +151,9 @@
                     <td>{{ employeer.birthday }}</td>
                     <td>{{ employeer.phone }}</td>
                     <td>{{ employeer.employment_date }}</td>
-                    <td><button type="submit" onclick="location.href=''">Инфо</button></td>
-                    <td><button type="submit" onclick="location.href=''">Отчёт ЗП</button></td>
-                    <td><button type="submit" onclick="location.href=''">Уволить</button></td>
+                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
+                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Отчёт ЗП</button></form></td>
+                    <td><form action="{% url 'profile' %}?delete={{ employeer.id }}" method="post">{% csrf_token %}<button type="submit">Уволить</button></form></td>
                 </tr>
                 {% endfor %}
             </tbody>

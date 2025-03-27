@@ -5,8 +5,12 @@ from MainApp.forms import *
 
 def profile_hr(request):
     employeers = Employees.objects.all()
+    print(request.GET.get("delete"))
     if not request.user.is_authenticated:
         return redirect("login")
+    if request.GET.get("delete") is not None:
+        Employees.objects.filter(id=request.GET.get("delete")).delete()
+
     return render(request, 'MainApp/main.html', {'employeers': employeers})
 
 def auth_hr(request):
