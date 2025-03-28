@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление сотрудниками</title>
+    <title>Управление отделами</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,36 +37,22 @@
             margin-bottom: 20px;
         }
         .search-box input {
-            padding: 5px;
+            padding: 10px;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         .search-box button {
-            padding: 5px 15px;
+            padding: 10px 20px;
             font-size: 16px;
             background-color: #FFB300;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
             transition: background-color 0.3s;
         }
         .search-box button:hover {
-            background-color: #E59400;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .actions button {
-            padding: 10px;
-            font-size: 16px;
-            background-color: #FFB300;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .actions button:hover {
             background-color: #E59400;
         }
         table {
@@ -84,6 +70,9 @@
         th {
             background-color: #f2f2f2;
         }
+        td {
+            background-color: #e0e0e0;
+        }
         .logout {
             background-color: #FFB300;
             color: white;
@@ -91,24 +80,23 @@
             text-decoration: none;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
             transition: background-color 0.3s;
         }
         .logout:hover {
             background-color: #E59400;
         }
-        .search-box button {
-            border-radius: 10px;
+        .delete-icon {
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="menu">
-            <label>КадроМастер</label>
             <a href="">Добавить сотрудника</a>
-            <a href="{% url 'department' %}">Отделы</a>
-            <a href="">Должности</a>
-            <a href="">Управление доступами</a>
+            <a href="{% url 'profile' %}">Поиск сотрудника</a>
+            <a href="">Добавление должности</a>
         </div>
         <form method="post" action="{% url 'logout' %}?next=/">
             {{ user.username }}
@@ -118,45 +106,26 @@
     </div>
     <div class="container">
         <form class="search-box" method="post">
-            {% csrf_token %}
-            <input type="text" name="fullname" placeholder="ФИО">
-            <input type="text" name="p_number" placeholder="Таб. номер">
-            <button type="submit">Найти</button>
+            <input type="text" placeholder="Название отдела" name="title">
+            <button type="submit">Добавить</button>
+            <button type="find">Найти</button>
         </form>
         <table>
             <thead>
                 <tr>
-                    <th>id</th>
-                    <th>ФИО</th>
-                    <th>Таб номер</th>
-                    <th>Пол</th>
-                    <th>Дата рождения</th>
-                    <th>Телефон</th>
-                    <th>Дата приёма</th>
-                    <th>Информация</th>
-                    <th>Отчёт ЗП</th>
-                    <th>Увольнение</th>
+                    <th>Название отдела</th>
+                    <th>Кол-во сотрудников</th>
+                    <th>Кол-во должностей</th>
+                    <th>Удалить</th>
                 </tr>
             </thead>
             <tbody>
-                {% for employeer in employeers %}
                 <tr>
-                    <td>{{ employeer.id }}</td>
-                    <td>{{ employeer.fullname }}</td>
-                    <td>{{ employeer.personnel_number }}</td>
-                    {% if employeer.gender == 'm' %}
-                    <td>Мужчина</td>
-                    {% else %}
-                    <td>Женщина</td>
-                    {% endif %}
-                    <td>{{ employeer.birthday }}</td>
-                    <td>{{ employeer.phone }}</td>
-                    <td>{{ employeer.employment_date }}</td>
-                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
-                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Отчёт ЗП</button></form></td>
-                    <td><form action="{% url 'profile' %}?delete={{ employeer.id }}" method="post">{% csrf_token %}<button type="submit">Уволить</button></form></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><button type="submit">Удалить</button></td>
                 </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>

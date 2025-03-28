@@ -14,6 +14,7 @@ class Employees(models.Model):
         (female, female),
     )
     fullname = models.CharField(max_length=150)
+    personnel_number = models.CharField(max_length=6, validators=[MinLengthValidator(12)], unique=True)
     gender = models.CharField(max_length=1, choices=genders)
     birthday = models.DateField()
     residence_address = models.CharField(max_length=255)

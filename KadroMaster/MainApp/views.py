@@ -2,14 +2,26 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from MainApp.models import *
 from MainApp.forms import *
+from django.db.models import Q
 
 def profile_hr(request):
     employeers = Employees.objects.all()
-    print(request.GET.get("delete"))
     if not request.user.is_authenticated:
         return redirect("login")
-    if request.GET.get("delete") is not None:
-        Employees.objects.filter(id=request.GET.get("delete")).delete()
+
+    if request.method == 'POST':
+        if request.GET.get("delete") is not None:
+            Employees.objects.filter(id=request.GET.get("delete")).delete()
+            return redirect("profile")
+        try:
+            if request.POST.get('fullname') and request.POST.get('p_number'):
+                employeers = Employees.objects.filter(Q(fullname__contains=request.POST.get('fullname')) & Q(personnel_number__contains=request.POST.get('p_number')))
+            elif request.POST.get('fullname'):
+                employeers = Employees.objects.filter(fullname__contains=request.POST.get('fullname'))
+            else:
+                employeers = Employees.objects.filter(personnel_number__contains=request.POST.get('p_number'))
+        except:
+            pass
 
     return render(request, 'MainApp/main.html', {'employeers': employeers})
 
@@ -32,3 +44,6 @@ def auth_hr(request):
                 return render(request, 'MainApp/login.html', {'error_message': error_message, 'users': users})
 
     return render(request, 'MainApp/login.html', {'users': users})
+
+def department_hr(request):
+    return render(request, 'MainApp/department.html')
