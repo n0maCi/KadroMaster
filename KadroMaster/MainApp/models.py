@@ -14,7 +14,7 @@ class Employees(models.Model):
         (female, female),
     )
     fullname = models.CharField(max_length=150)
-    personnel_number = models.CharField(max_length=6, validators=[MinLengthValidator(12)], unique=True)
+    personnel_number = models.CharField(max_length=6, validators=[MinLengthValidator(6)], unique=True)
     gender = models.CharField(max_length=1, choices=genders)
     birthday = models.DateField()
     residence_address = models.CharField(max_length=255)
@@ -29,6 +29,7 @@ class Employees(models.Model):
 
 class Departments(models.Model):
     title = models.CharField(max_length=150, unique=True)
+    amount_jobs = models.IntegerField(default=0)
 
 class Jobs(models.Model):
     title = models.CharField(max_length=150)

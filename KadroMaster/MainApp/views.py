@@ -46,4 +46,21 @@ def auth_hr(request):
     return render(request, 'MainApp/login.html', {'users': users})
 
 def department_hr(request):
-    return render(request, 'MainApp/department.html')
+    departments = Departments.objects.all()
+    if not request.user.is_authenticated:
+        return redirect("login")
+    
+    if request.method == 'POST':
+        if 'add' in request.POST:
+            department_new = Departments()
+            department_new.title = request.POST.get('title')
+            try:
+                department_new.save()
+            except:
+                return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Данный отдел уже существует'})
+        elif 'find' in request.POST:
+            departments = Departments.objects.filter(title__contains=request.POST.get('title'))
+        elif 'delete' in request.GET:
+            Departments.objects.filter(id=request.GET.get("delete")).delete()
+            return redirect('department')
+    return render(request, 'MainApp/department.html', {'departments': departments})

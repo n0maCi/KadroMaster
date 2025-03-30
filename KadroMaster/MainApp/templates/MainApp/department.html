@@ -94,9 +94,8 @@
 <body>
     <div class="header">
         <div class="menu">
-            <a href="">Добавить сотрудника</a>
-            <a href="{% url 'profile' %}">Поиск сотрудника</a>
-            <a href="">Добавление должности</a>
+            <label>КадроМастер</label>
+            <a href="{% url 'profile' %}">Назад</a>
         </div>
         <form method="post" action="{% url 'logout' %}?next=/">
             {{ user.username }}
@@ -106,10 +105,12 @@
     </div>
     <div class="container">
         <form class="search-box" method="post">
+            {% csrf_token %}
             <input type="text" placeholder="Название отдела" name="title">
-            <button type="submit">Добавить</button>
-            <button type="find">Найти</button>
+            <button type="submit" name="add">Добавить</button>
+            <button type="find" name="find">Найти</button>
         </form>
+        {{ error }}
         <table>
             <thead>
                 <tr>
@@ -120,12 +121,14 @@
                 </tr>
             </thead>
             <tbody>
+                {% for department in departments %}
                 <tr>
+                    <td>{{ department.title }}</td>
                     <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><button type="submit">Удалить</button></td>
+                    <td>{{ department.amount_jobs }}</td>
+                    <td><form action="{% url 'department' %}?delete={{ department.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

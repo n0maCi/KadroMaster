@@ -126,7 +126,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>id</th>
                     <th>ФИО</th>
                     <th>Таб номер</th>
                     <th>Пол</th>
@@ -141,7 +140,6 @@
             <tbody>
                 {% for employeer in employeers %}
                 <tr>
-                    <td>{{ employeer.id }}</td>
                     <td>{{ employeer.fullname }}</td>
                     <td>{{ employeer.personnel_number }}</td>
                     {% if employeer.gender == 'm' %}
