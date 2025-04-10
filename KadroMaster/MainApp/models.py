@@ -30,6 +30,7 @@ class Employees(models.Model):
 class Departments(models.Model):
     title = models.CharField(max_length=150, unique=True)
     amount_jobs = models.IntegerField(default=0)
+    amount_employees = models.IntegerField(default=0)
 
 class Jobs(models.Model):
     title = models.CharField(max_length=150)

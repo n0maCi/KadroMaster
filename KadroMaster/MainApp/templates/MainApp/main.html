@@ -107,7 +107,7 @@
             <label>КадроМастер</label>
             <a href="">Добавить сотрудника</a>
             <a href="{% url 'department' %}">Отделы</a>
-            <a href="">Должности</a>
+            <a href="{% url 'job' %}">Должности</a>
             <a href="">Управление доступами</a>
         </div>
         <form method="post" action="{% url 'logout' %}?next=/">

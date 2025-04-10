@@ -61,6 +61,18 @@ def department_hr(request):
         elif 'find' in request.POST:
             departments = Departments.objects.filter(title__contains=request.POST.get('title'))
         elif 'delete' in request.GET:
-            Departments.objects.filter(id=request.GET.get("delete")).delete()
+            delete_department = Departments.objects.filter(Q(id=request.GET.get("delete")) & Q(amount_jobs=0) & Q(amount_employees=0)).delete()
+            if delete_department[0] == 0:
+                delete_department = Departments.objects.filter(id=request.GET.get("delete")).first()
+                if delete_department.amount_jobs != 0:
+                    return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Количество должностей больше 0'})
+                elif delete_department.amount_employees != 0:
+                    return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Количество сотрудников больше 0'})
             return redirect('department')
     return render(request, 'MainApp/department.html', {'departments': departments})
+
+def job_hr(request):
+    departments = Departments.objects.all()
+    if not request.user.is_authenticated:
+        return redirect("login")
+    return render(request, 'MainApp/job.html', {'departments': departments})

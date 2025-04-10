@@ -89,6 +89,10 @@
         .delete-icon {
             cursor: pointer;
         }
+        select {
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -105,30 +109,35 @@
     </div>
     <div class="container">
         <form class="search-box" method="post">
-            {% csrf_token %}
-            <input type="text" placeholder="Название отдела" name="title">
-            <button type="submit" name="add">Добавить</button>
-            <button type="find" name="find">Найти</button>
+            <input type="text" placeholder="Название" name="title">
+            <select name="departament_title">
+                <option value="" disabled selected>Отделы</option>
+                {% for department in departments %}
+                <option value="{{ department.id }}">{{ department.title }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" placeholder="ЗП/час" name="salary_per_hour">
+            <button type="find">Найти</button>
+            <button type="submit">Добавить</button>
         </form>
-        {{ error }}
         <table>
             <thead>
                 <tr>
-                    <th>Название отдела</th>
-                    <th>Кол-во сотрудников</th>
-                    <th>Кол-во должностей</th>
+                    <th>Название должности</th>
+                    <th>Отдел</th>
+                    <th>Зарплата в час</th>
+                    <th>Кол-во работников</th>
                     <th>Удалить</th>
                 </tr>
             </thead>
             <tbody>
-                {% for department in departments %}
                 <tr>
-                    <td>{{ department.title }}</td>
-                    <td>{{ department.amount_employees }}</td>
-                    <td>{{ department.amount_jobs }}</td>
-                    <td><form action="{% url 'department' %}?delete={{ department.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
+                    <td></td>
+                    <td></td>
+                    <td> рублей</td>
+                    <td></td>
+                    <td><button type="submit">Удалить</button></td>
                 </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>
