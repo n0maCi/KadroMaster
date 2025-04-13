@@ -109,16 +109,17 @@
     </div>
     <div class="container">
         <form class="search-box" method="post">
+            {% csrf_token %}
             <input type="text" placeholder="Название" name="title">
-            <select name="departament_title">
+            <select name="departament_id">
                 <option value="" disabled selected>Отделы</option>
                 {% for department in departments %}
                 <option value="{{ department.id }}">{{ department.title }}</option>
                 {% endfor %}
             </select>
             <input type="text" placeholder="ЗП/час" name="salary_per_hour">
-            <button type="find">Найти</button>
-            <button type="submit">Добавить</button>
+            <button type="find" name="find">Найти</button>
+            <button type="submit" name="add">Добавить</button>
         </form>
         <table>
             <thead>
@@ -131,13 +132,15 @@
                 </tr>
             </thead>
             <tbody>
+                {% for job in jobs %}
                 <tr>
-                    <td></td>
-                    <td></td>
-                    <td> рублей</td>
-                    <td></td>
-                    <td><button type="submit">Удалить</button></td>
+                    <td>{{ job.title }}</td>
+                    <td>{{ job.departament.title }}</td>
+                    <td>{{ job.salary_per_hour }} рублей</td>
+                    <td>{{ job.employees_set.count }}</td>
+                    <td><form action="{% url 'job' %}?delete={{ job.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>

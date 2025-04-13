@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from MainApp.models import *
 from MainApp.forms import *
-from django.db.models import Q
+from django.db.models import Q, F, Count
 
 def profile_hr(request):
     employeers = Employees.objects.all()
@@ -46,7 +46,7 @@ def auth_hr(request):
     return render(request, 'MainApp/login.html', {'users': users})
 
 def department_hr(request):
-    departments = Departments.objects.all()
+    departments = Departments.objects.annotate(employee_count=Count('jobs__employees')).prefetch_related('jobs_set')
     if not request.user.is_authenticated:
         return redirect("login")
     
@@ -61,18 +61,30 @@ def department_hr(request):
         elif 'find' in request.POST:
             departments = Departments.objects.filter(title__contains=request.POST.get('title'))
         elif 'delete' in request.GET:
-            delete_department = Departments.objects.filter(Q(id=request.GET.get("delete")) & Q(amount_jobs=0) & Q(amount_employees=0)).delete()
-            if delete_department[0] == 0:
-                delete_department = Departments.objects.filter(id=request.GET.get("delete")).first()
-                if delete_department.amount_jobs != 0:
-                    return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Количество должностей больше 0'})
-                elif delete_department.amount_employees != 0:
-                    return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Количество сотрудников больше 0'})
-            return redirect('department')
+            count_of_jobs = Jobs.objects.filter(departament=Departments.objects.filter(id=request.GET.get("delete")).first()).count()
+            if count_of_jobs == 0:
+                Departments.objects.filter(id=request.GET.get("delete")).delete()
+            else:
+                return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Необходимо удалить все должности'})
     return render(request, 'MainApp/department.html', {'departments': departments})
 
 def job_hr(request):
     departments = Departments.objects.all()
+    jobs = Jobs.objects.all().prefetch_related('employees_set')
     if not request.user.is_authenticated:
         return redirect("login")
-    return render(request, 'MainApp/job.html', {'departments': departments})
+    
+    if request.method == 'POST':
+        if 'add' in request.POST:
+            job_new = Jobs()
+            job_new.title = request.POST.get('title')
+            job_new.salary_per_hour = request.POST.get('salary_per_hour')
+            job_new.departament = Departments.objects.filter(id=request.POST.get('departament_id')).first()
+            job_new.save()
+        elif 'find' in request.POST:
+            print(request.POST.get('title'))
+            print(request.POST.get('salary_per_hour'))
+            print(request.POST.get('departament_id'))
+        elif 'delete' in request.GET:
+            delete_job = Jobs.objects.filter(Q(id=request.GET.get("delete"))).delete()
+    return render(request, 'MainApp/job.html', {'departments': departments, 'jobs': jobs})

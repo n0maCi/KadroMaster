@@ -6,6 +6,14 @@ class User(AbstractUser):
     password = models.CharField(("password"), max_length=128)
     username = models.CharField(max_length=150, unique=True)
 
+class Departments(models.Model):
+    title = models.CharField(max_length=150, unique=True)
+
+class Jobs(models.Model):
+    title = models.CharField(max_length=150)
+    salary_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
+    departament = models.ForeignKey(Departments, on_delete=models.DO_NOTHING)
+
 class Employees(models.Model):
     male = 'm'
     female = 'f'
@@ -26,17 +34,7 @@ class Employees(models.Model):
     insurance_number = models.CharField(max_length=11, validators=[MinLengthValidator(11)])
     work_book_number = models.CharField(max_length=7, validators=[MinLengthValidator(7)])
     military_ticket = models.CharField(max_length=7, validators=[MinLengthValidator(7)], null=True)
-
-class Departments(models.Model):
-    title = models.CharField(max_length=150, unique=True)
-    amount_jobs = models.IntegerField(default=0)
-    amount_employees = models.IntegerField(default=0)
-
-class Jobs(models.Model):
-    title = models.CharField(max_length=150)
-    salary_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
-    amount = models.IntegerField(default=0)
-    departament = models.ForeignKey(Departments, on_delete=models.DO_NOTHING)
+    job = models.ForeignKey(Jobs, on_delete=models.DO_NOTHING)
 
 class TimeTraking(models.Model):
     date = models.DateField()

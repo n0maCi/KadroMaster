@@ -124,8 +124,8 @@
                 {% for department in departments %}
                 <tr>
                     <td>{{ department.title }}</td>
-                    <td>{{ department.amount_employees }}</td>
-                    <td>{{ department.amount_jobs }}</td>
+                    <td>{{ department.employee_count }}</td>
+                    <td>{{ department.jobs_set.count }}</td>
                     <td><form action="{% url 'department' %}?delete={{ department.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
                 </tr>
                 {% endfor %}
