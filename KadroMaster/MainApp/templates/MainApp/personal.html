@@ -92,43 +92,97 @@
         <form class="form-box" id="employeeForm" method="post">
             {% csrf_token %}
             <select id="departmentSelect" name="department" required>
-                <option value="" disabled selected>Отдел</option>
-                {% for department in departments %}
-                <option value="{% url 'personal' %}?department={{ department.id }}">{{ department.title }}</option>
+                <option value="" selected disabled>Отдел</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.title }}</option>
                 {% endfor %}
             </select>
-            <input type="text" placeholder="Дата рождения" onfocus="(this.type='date')" onblur="(this.type='text')" name="birthday">
-            <select id="jobTitleSelect" name="job_title" required>
-                <option value="" disabled selected>Должность</option>
-                {% for job in jobs %}
-                <option value="{{ job.id }}">{{ job.title }}</option>
-                {% endfor %}
+            <input type="text" placeholder="Дата рождения" onfocus="(this.type='date')" onblur="(this.type='text')" name="birthday" required>
+            <select id="jobTitleSelect" name="job" required>
+                <option value="" disabled selected>Сначала выберите отдел</option>
+                <!-- Должности будут загружаться через AJAX -->
             </select>
             <select name="gender" required>
                 <option value="" disabled selected>Пол</option>
-                <option value="М">Мужской</option>
-                <option value="Ж">Женский</option>
+                <option value="m">Мужской</option>
+                <option value="f">Женский</option>
             </select>
-            <input type="text" placeholder="ФИО" name="username" required>
-            <input type="text" placeholder="Адрес проживания" name="residence_address">
-            <input type="tel" placeholder="Телефон" name="phone">
-            <input type="email" placeholder="Почта" name="email">
-            <input type="text" placeholder="Паспорт" name="passport">
-            <input type="text" placeholder="СНИЛС" name="insurance_number">
-            <input type="text" placeholder="ИНН" name="individual_tax_number">
-            <input type="text" placeholder="Номер трудовой книжки" name="work_book_number">
+            <input type="text" placeholder="ФИО" name="fullname" required>
+            <input type="text" placeholder="Адрес проживания" name="residence_address" required>
+            <input type="tel" placeholder="Телефон" name="phone" required>
+            <input type="email" placeholder="Почта" name="email" required>
+            <input type="text" placeholder="Паспорт" name="passport" required>
+            <input type="text" placeholder="СНИЛС" name="insurance_number" required>
+            <input type="text" placeholder="ИНН" name="individual_tax_number" required>
+            <input type="text" placeholder="Номер трудовой книжки" name="work_book_number" required>
             <input type="text" placeholder="Номер военного билета" name="military_ticket">
-            <input type="text" placeholder="Дата принятия" onfocus="(this.type='date')" onblur="(this.type='text')" name="employment_date">
+            <input type="text" placeholder="Дата принятия" onfocus="(this.type='date')" onblur="(this.type='text')" name="employment_date" required>
             <button class="submit-button" type="submit">Добавить</button>
         </form>
     </div>
     <script>
-    document.getElementById('departmentSelect').addEventListener('change', function() {
-    var selectedPage = this.value;
-    if (selectedPage) {
-        window.location.href = selectedPage;
-    }
-    });
+        document.addEventListener('DOMContentLoaded', function() {
+            const departmentSelect = document.getElementById('departmentSelect');
+            const jobTitleSelect = document.getElementById('jobTitleSelect');
+            
+            // Функция для загрузки должностей через AJAX
+            function loadJobTitles(departmentId) {
+                // Показываем сообщение о загрузке
+                jobTitleSelect.innerHTML = '<option value="" disabled selected>Загрузка должностей...</option>';
+                jobTitleSelect.disabled = true;
+                
+                // Делаем AJAX-запрос
+                fetch(`/api/job-titles/?department=${departmentId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Ошибка загрузки должностей');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Очищаем список
+                        jobTitleSelect.innerHTML = '';
+                        
+                        // Добавляем заголовок
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        defaultOption.textContent = 'Выберите должность';
+                        jobTitleSelect.appendChild(defaultOption);
+                        
+                        // Добавляем полученные должности
+                        data.forEach(job => {
+                            const option = document.createElement('option');
+                            option.value = job.id;
+                            option.textContent = job.title;
+                            jobTitleSelect.appendChild(option);
+                        });
+                        
+                        jobTitleSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        jobTitleSelect.innerHTML = '<option value="" disabled selected>Ошибка загрузки</option>';
+                    });
+            }
+            
+            // Обработчик изменения выбора отдела
+            departmentSelect.addEventListener('change', function() {
+                const selectedDeptId = this.value;
+                if (selectedDeptId) {
+                    loadJobTitles(selectedDeptId);
+                } else {
+                    jobTitleSelect.innerHTML = '<option value="" disabled selected>Сначала выберите отдел</option>';
+                    jobTitleSelect.disabled = true;
+                }
+            });
+            
+            // Инициализация при загрузке страницы
+            if (departmentSelect.value) {
+                loadJobTitles(departmentSelect.value);
+            }
+        });
     </script>
 </body>
 </html>

@@ -52,3 +52,9 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['old_password'].widget.attrs.update({'autofocus': True})
+
+class AddEmployee(ModelForm):
+    class Meta:
+        model = Employees
+        fields = ['fullname', 'gender', 'birthday', 'residence_address', 'phone', 'employment_date', 'passport', 'email',
+                  'individual_tax_number', 'insurance_number', 'work_book_number', 'job']

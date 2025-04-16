@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate, login
 from MainApp.models import *
 from MainApp.forms import *
 from django.db.models import Q, F, Count
-from passlib.hash import django_pbkdf2_sha256
+from django.http import JsonResponse
+import random
 
 def profile_hr(request):
     employeers = Employees.objects.all()
@@ -114,5 +115,23 @@ def personal_hr(request):
     if not request.user.is_authenticated:
         return redirect("login")
     departments = Departments.objects.all()
-    jobs = Jobs.objects.all()
-    return render(request, 'MainApp/personal.html', {'departments': departments, 'jobs': jobs})
+
+    if request.method == 'POST':
+        form = AddEmployee(request.POST)
+        if form.is_valid():
+            db = form.save(commit=False)
+            if request.POST['military_ticket']:
+                db.military_ticket = request.POST['military_ticket']
+            db.personnel_number = random.randint(100000,999999)
+            db.save()
+    return render(request, 'MainApp/personal.html', {'departments': departments})
+
+def get_job_titles(request):
+    department_id = request.GET.get('department')
+    if department_id:
+        jobs = Jobs.objects.filter(departament_id=department_id)
+    else:
+        jobs = Jobs.objects.none()
+    
+    data = [{'id': job.id, 'title': job.title} for job in jobs]
+    return JsonResponse(data, safe=False)
