@@ -8,4 +8,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('department/', department_hr, name="department"),
     path('job/', job_hr, name="job"),
+    path('change-password/', password_hr, name="password"),
+    path('personal/', personal_hr, name="personal"),
 ]

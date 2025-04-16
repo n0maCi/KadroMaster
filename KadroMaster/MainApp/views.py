@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login
 from MainApp.models import *
 from MainApp.forms import *
 from django.db.models import Q, F, Count
+from passlib.hash import django_pbkdf2_sha256
 
 def profile_hr(request):
     employeers = Employees.objects.all()
@@ -59,7 +60,7 @@ def department_hr(request):
             except:
                 return render(request, 'MainApp/department.html', {'departments': departments, 'error': 'Данный отдел уже существует'})
         elif 'find' in request.POST:
-            departments = Departments.objects.filter(title__contains=request.POST.get('title'))
+            departments = Departments.objects.filter(title__contains=request.POST.get('title')).annotate(employee_count=Count('jobs__employees')).prefetch_related('jobs_set')
         elif 'delete' in request.GET:
             count_of_jobs = Jobs.objects.filter(departament=Departments.objects.filter(id=request.GET.get("delete")).first()).count()
             if count_of_jobs == 0:
@@ -80,11 +81,38 @@ def job_hr(request):
             job_new.title = request.POST.get('title')
             job_new.salary_per_hour = request.POST.get('salary_per_hour')
             job_new.departament = Departments.objects.filter(id=request.POST.get('departament_id')).first()
-            job_new.save()
+            try:
+                job_new.save()
+            except:
+                pass
         elif 'find' in request.POST:
-            print(request.POST.get('title'))
-            print(request.POST.get('salary_per_hour'))
-            print(request.POST.get('departament_id'))
+            filter_params = {
+            'title__contains': request.POST.get('title'),
+            'salary_per_hour__contains': request.POST.get('salary_per_hour'),
+            'departament_id': request.POST.get('departament_id'),
+            }
+            filter_params = {k: v for k, v in filter_params.items() if v is not None}
+            jobs = Jobs.objects.filter(**filter_params).prefetch_related('employees_set')
         elif 'delete' in request.GET:
-            delete_job = Jobs.objects.filter(Q(id=request.GET.get("delete"))).delete()
+            Jobs.objects.filter(Q(id=request.GET.get("delete"))).delete()
     return render(request, 'MainApp/job.html', {'departments': departments, 'jobs': jobs})
+
+def password_hr(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = CustomPasswordChangeForm(request.user)
+    return render(request, 'MainApp/password.html', {'form': form})
+
+def personal_hr(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    departments = Departments.objects.all()
+    jobs = Jobs.objects.all()
+    return render(request, 'MainApp/personal.html', {'departments': departments, 'jobs': jobs})

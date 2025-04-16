@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление сотрудника</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header {
+            background-color: #FFB300;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .header .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .form-box input, .form-box select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-box input[type="date"] {
+            background-color: #f7f7f7;
+        }
+        .submit-button {
+            grid-column: span 2;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .submit-button:hover {
+            background-color: #E59400;
+        }
+        .logout {
+            background-color: #FFB300;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .logout:hover {
+            background-color: #E59400;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu">
+            <label>КадроМастер</label>
+            <a href="{% url 'profile' %}">Назад</a>
+        </div>
+        <form method="post" action="{% url 'logout' %}?next=/">
+            {{ user.username }}
+            {% csrf_token %}
+            <button class="logout" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="container">
+        <form class="form-box" id="employeeForm" method="post">
+            {% csrf_token %}
+            <select id="departmentSelect" name="department" required>
+                <option value="" disabled selected>Отдел</option>
+                {% for department in departments %}
+                <option value="{% url 'personal' %}?department={{ department.id }}">{{ department.title }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" placeholder="Дата рождения" onfocus="(this.type='date')" onblur="(this.type='text')" name="birthday">
+            <select id="jobTitleSelect" name="job_title" required>
+                <option value="" disabled selected>Должность</option>
+                {% for job in jobs %}
+                <option value="{{ job.id }}">{{ job.title }}</option>
+                {% endfor %}
+            </select>
+            <select name="gender" required>
+                <option value="" disabled selected>Пол</option>
+                <option value="М">Мужской</option>
+                <option value="Ж">Женский</option>
+            </select>
+            <input type="text" placeholder="ФИО" name="username" required>
+            <input type="text" placeholder="Адрес проживания" name="residence_address">
+            <input type="tel" placeholder="Телефон" name="phone">
+            <input type="email" placeholder="Почта" name="email">
+            <input type="text" placeholder="Паспорт" name="passport">
+            <input type="text" placeholder="СНИЛС" name="insurance_number">
+            <input type="text" placeholder="ИНН" name="individual_tax_number">
+            <input type="text" placeholder="Номер трудовой книжки" name="work_book_number">
+            <input type="text" placeholder="Номер военного билета" name="military_ticket">
+            <input type="text" placeholder="Дата принятия" onfocus="(this.type='date')" onblur="(this.type='text')" name="employment_date">
+            <button class="submit-button" type="submit">Добавить</button>
+        </form>
+    </div>
+    <script>
+    document.getElementById('departmentSelect').addEventListener('change', function() {
+    var selectedPage = this.value;
+    if (selectedPage) {
+        window.location.href = selectedPage;
+    }
+    });
+    </script>
+</body>
+</html>
