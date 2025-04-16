@@ -11,4 +11,5 @@ urlpatterns = [
     path('change-password/', password_hr, name="password"),
     path('personal/', personal_hr, name="personal"),
     path('api/job-titles/', get_job_titles, name='get_job_titles'),
+    path('time-tracking/', time_tracking_hr, name="time-tracking"),
 ]

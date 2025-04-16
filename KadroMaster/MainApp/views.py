@@ -135,3 +135,6 @@ def get_job_titles(request):
     
     data = [{'id': job.id, 'title': job.title} for job in jobs]
     return JsonResponse(data, safe=False)
+
+def time_tracking_hr(request):
+    return render(request, 'MainApp/time_tracking.html')
