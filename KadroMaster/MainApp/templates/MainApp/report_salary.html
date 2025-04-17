@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Формирование ЗП</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .header button:hover {
+            background-color: #d87f00;
+        }
+        .back-button {
+            background-color: #FFB300;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+            flex: 1;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .form-group button:hover {
+            background-color: #d87f00;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 15px;
+            border: 1px solid #ccc;
+            text-align: left;
+            background-color: #f2f2f2;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{% url 'profile' %}">Назад</a>
+            <span>{{ username.username }}</span>
+        </div>
+        <form class="form-group" method="post">
+            {% csrf_token %}
+            <span>Период</span>
+            <label for="">C</label>
+            <input type="date" placeholder="с" onfocus="(this.type='date')" onblur="(this.type='text')" name="from">
+            <label for="">До</label>
+            <input type="date" placeholder="до" onfocus="(this.type='date')" onblur="(this.type='text')" name="before">
+            <button name="add">Сформировать</button>
+        </form>
+        {{ error }}
+        <table>
+            <thead>
+                <tr>
+                    <th>Кол-во часов</th>
+                    <th>Дата формирования отчета</th>
+                    <th>Итоговая ЗП</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for salary in salaries %}
+                <tr>
+                    <td>{{ salary.number_of_hours_worked }}</td>
+                    <td>{{ salary.salary_date }}</td>
+                    <td>{{ salary.final_salary }}</td>
+                </tr>
+                {% endfor %}
+                <!-- Другие записи -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

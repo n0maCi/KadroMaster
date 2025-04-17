@@ -152,8 +152,8 @@
                     <td>{{ employeer.birthday }}</td>
                     <td>{{ employeer.phone }}</td>
                     <td>{{ employeer.employment_date }}</td>
-                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
-                    <td><form action="{% url 'profile' %}" method="post">{% csrf_token %}<button type="submit">Отчёт ЗП</button></form></td>
+                    <td><form action="{% url 'info-personal' id=employeer.id %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
+                    <td><form action="{% url 'salary' id=employeer.id %}" method="post">{% csrf_token %}<button type="submit">Отчёт ЗП</button></form></td>
                     <td><form action="{% url 'profile' %}?delete={{ employeer.id }}" method="post">{% csrf_token %}<button type="submit">Уволить</button></form></td>
                 </tr>
                 {% endfor %}

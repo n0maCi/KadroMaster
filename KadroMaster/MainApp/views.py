@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from MainApp.models import *
 from MainApp.forms import *
-from django.db.models import Q, F, Count
+from django.db.models import Q, F, Count, Sum
 from django.http import JsonResponse
-import random
+import random, datetime
 
 def profile_hr(request):
     employeers = Employees.objects.all()
@@ -162,3 +162,44 @@ def time_tracking_hr(request):
         elif 'delete' in request.GET:
             TimeTraking.objects.filter(id=request.GET.get("delete")).delete()
     return render(request, 'MainApp/time_tracking.html', {'employeers': employeers, 'time_tracking': time_tracking})
+
+def info_personal_hr(request, id):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    departments = Departments.objects.all()
+    employee = Employees.objects.filter(id=id).first()
+    if request.method == 'POST':
+        if 'new' in request.POST:
+            if request.POST.get('job') is not None:
+                employee.job = Jobs.objects.filter(id=request.POST.get('job')).first()
+            employee.fullname = request.POST.get('fullname')
+            employee.birthday = request.POST.get('birthday')
+            employee.gender = request.POST.get('gender')
+            employee.phone = request.POST.get('phone')
+            employee.residence_address = request.POST.get('residence_address')
+            employee.passport = request.POST.get('passport')
+            employee.insurance_number = request.POST.get('insurance_number')
+            employee.individual_tax_number = request.POST.get('individual_tax_number')
+            employee.work_book_number = request.POST.get('work_book_number')
+            employee.military_ticket = request.POST.get('military_ticket')
+            employee.email = request.POST.get('email')
+            employee.employment_date = request.POST.get('employment_date')
+            employee.save()
+            return redirect("info-personal", id=id)
+    return render(request, 'MainApp/info_personal.html', {'departments': departments, 'employee': employee})
+
+def salary_hr(request, id):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    salaries = Salary.objects.filter(employee=id)
+    if request.POST:
+        if 'add' in request.POST:
+            if request.POST.get('from') > request.POST.get('before'):
+                return render(request, 'MainApp/report_salary.html', {'salaries': salaries, 'error': 'Период с не должен превышать периода до'})
+            else:
+                employee_salary_hour = Employees.objects.filter(id=id).first().job.salary_per_hour
+                employee_amount_hours = TimeTraking.objects.filter(employee=id, date__range=(request.POST.get('from'), request.POST.get('before'))).aggregate(Sum('amount'))['amount__sum']
+                employee_final_salary = employee_salary_hour * employee_amount_hours
+                current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+                Salary.objects.create(salary_date=current_date, number_of_hours_worked=employee_amount_hours, final_salary=employee_final_salary, employee=Employees.objects.filter(id=id).first())
+    return render(request, 'MainApp/report_salary.html', {'salaries': salaries})

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр данных</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header {
+            background-color: #FFB300;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .header .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .form-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+        }
+        .form-box input, .form-box select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-box input[type="date"] {
+            background-color: #f7f7f7;
+        }
+        .submit-button {
+            grid-column: span 2;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .submit-button:hover {
+            background-color: #E59400;
+        }
+        .logout {
+            background-color: #FFB300;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .logout:hover {
+            background-color: #E59400;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu">
+            <label>КадроМастер</label>
+            <a href="{% url 'profile' %}">Назад</a>
+        </div>
+        <form method="post" action="{% url 'logout' %}?next=/">
+            {{ user.username }}
+            {% csrf_token %}
+            <button class="logout" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="container">
+        <form class="form-box" id="employeeForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="departmentSelect">Отдел</label>
+                <select id="departmentSelect" name="department" required>
+                    <option value="{{ employee.job.departament.id }}" selected disabled>{{ employee.job.departament.title }}</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Дата рождения</label>
+                <input type="date" placeholder="Дата рождения" onfocus="(this.type='date')" onblur="(this.type='text')" name="birthday" value="{{ employee.birthday|date:'Y-m-d' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="jobTitleSelect">Должность</label>
+                <select id="jobTitleSelect" name="job" required>
+                    <option value="{{ employee.job.id }}" selected>{{ employee.job.title }}</option>
+                    <!-- Должности будут загружаться через AJAX -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Пол</label>
+                <select name="gender" required>
+                    {% if employee.gender == 'm' %}
+                        <option value="m" selected>Мужской</option>
+                        {% else %}
+                        <option value="f" selected>Женский</option>
+                    {% endif %}
+                    <option value="m">Мужской</option>
+                    <option value="f">Женский</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>ФИО</label>
+                <input type="text" placeholder="ФИО" name="fullname" value="{{ employee.fullname }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Адрес проживания</label>
+                <input type="text" placeholder="Адрес проживания" name="residence_address" value="{{ employee.residence_address }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Телефон</label>
+                <input type="tel" placeholder="Телефон" name="phone" value="{{ employee.phone }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Почта</label>
+                <input type="email" placeholder="Почта" name="email" value="{{ employee.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Паспорт</label>
+                <input type="text" placeholder="Паспорт" name="passport" value="{{ employee.passport }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>СНИЛС</label>
+                <input type="text" placeholder="СНИЛС" name="insurance_number" value="{{ employee.insurance_number }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>ИНН</label>
+                <input type="text" placeholder="ИНН" name="individual_tax_number" value="{{ employee.individual_tax_number }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Номер трудовой книжки</label>
+                <input type="text" placeholder="Номер трудовой книжки" name="work_book_number" value="{{ employee.work_book_number }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Номер военного билета</label>
+                {% if employee.military_ticket == None %}
+                    <input type="text" placeholder="Номер военного билета" name="military_ticket">
+                {% else %}
+                    <input type="text" placeholder="Номер военного билета" name="military_ticket" value="{{ employee.military_ticket }}">
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label>Дата принятия</label>
+                <input type="date" placeholder="Дата принятия" onfocus="(this.type='date')" onblur="(this.type='text')" name="employment_date" value="{{ employee.employment_date|date:'Y-m-d' }}" required>
+            </div>
+            
+            <button class="submit-button" type="submit" name="new">Сохранить</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const departmentSelect = document.getElementById('departmentSelect');
+            const jobTitleSelect = document.getElementById('jobTitleSelect');
+            
+            // Функция для загрузки должностей через AJAX
+            function loadJobTitles(departmentId) {
+                // Показываем сообщение о загрузке
+                jobTitleSelect.innerHTML = '<option value="" disabled selected>Загрузка должностей...</option>';
+                jobTitleSelect.disabled = true;
+                
+                // Делаем AJAX-запрос
+                fetch(`/api/job-titles/?department=${departmentId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Ошибка загрузки должностей');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Очищаем список
+                        jobTitleSelect.innerHTML = '';
+                        
+                        // Добавляем заголовок
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '{{ employee.job.id }}';
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        defaultOption.textContent = '{{ employee.job.title }}';
+                        jobTitleSelect.appendChild(defaultOption);
+                        
+                        // Добавляем полученные должности
+                        data.forEach(job => {
+                            const option = document.createElement('option');
+                            option.value = job.id;
+                            option.textContent = job.title;
+                            jobTitleSelect.appendChild(option);
+                        });
+                        
+                        jobTitleSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        jobTitleSelect.innerHTML = '<option value="" disabled selected>Ошибка загрузки</option>';
+                    });
+            }
+            
+            // Обработчик изменения выбора отдела
+            departmentSelect.addEventListener('change', function() {
+                const selectedDeptId = this.value;
+                if (selectedDeptId) {
+                    loadJobTitles(selectedDeptId);
+                } else {
+                    jobTitleSelect.innerHTML = '<option value="" disabled selected>Сначала выберите отдел</option>';
+                    jobTitleSelect.disabled = true;
+                }
+            });
+            
+            // Инициализация при загрузке страницы
+            if (departmentSelect.value) {
+                loadJobTitles(departmentSelect.value);
+            }
+        });
+    </script>
+</body>
+</html>
