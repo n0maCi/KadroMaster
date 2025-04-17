@@ -137,4 +137,28 @@ def get_job_titles(request):
     return JsonResponse(data, safe=False)
 
 def time_tracking_hr(request):
-    return render(request, 'MainApp/time_tracking.html')
+    if not request.user.is_authenticated:
+        return redirect("login")
+    employeers = Employees.objects.all()
+    time_tracking = TimeTraking.objects.all()
+    if request.method == 'POST':
+        if 'add' in request.POST:
+            time_tracking_new = TimeTraking()
+            time_tracking_new.date = request.POST.get('date')
+            time_tracking_new.amount = request.POST.get('amount')
+            time_tracking_new.employee = Employees.objects.filter(id=request.POST.get('employee')).first()
+            try:
+                time_tracking_new.save()
+            except:
+                pass
+        elif 'find' in request.POST:
+            filter_params = {
+            'date': request.POST.get('date'),
+            'amount': request.POST.get('amount'),
+            'employee_id': request.POST.get('employee'),
+            }
+            filter_params = {k: v for k, v in filter_params.items() if v is not None and v != ''}
+            time_tracking = TimeTraking.objects.filter(**filter_params)
+        elif 'delete' in request.GET:
+            TimeTraking.objects.filter(id=request.GET.get("delete")).delete()
+    return render(request, 'MainApp/time_tracking.html', {'employeers': employeers, 'time_tracking': time_tracking})

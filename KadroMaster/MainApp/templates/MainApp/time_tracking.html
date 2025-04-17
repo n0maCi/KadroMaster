@@ -101,18 +101,19 @@
         </form>
     </div>
     <div class="container">
-        <div class="form-box">
-            <select>
+        <form class="form-box" method="post">
+            {% csrf_token %}
+            <select name="employee">
                 <option value="" disabled selected>Сотрудник</option>
-                <option value="Иванов Иван Иванович">Иванов Иван Иванович</option>
-                <option value="Петров Петр Петрович">Петров Петр Петрович</option>
-                <option value="Сидоров Сидор Сидорович">Сидоров Сидор Сидорович</option>
+                {% for employee in employeers %}
+                <option value="{{ employee.id }}">{{ employee.fullname }}</option>
+                {% endfor %}
             </select>
-            <input type="date" placeholder="Дата">
-            <input type="number" placeholder="Кол-во часов">
-            <button class="submit-button">Найти</button>
-            <button class="submit-button">Добавить</button>
-        </div>
+            <input type="date" placeholder="Дата" name="date">
+            <input type="number" placeholder="Кол-во часов" name="amount">
+            <button class="submit-button" name="find">Найти</button>
+            <button class="submit-button" name="add">Добавить</button>
+        </form>
         <table class="table">
             <thead>
                 <tr>
@@ -123,12 +124,14 @@
                 </tr>
             </thead>
             <tbody>
+                {% for time in time_tracking %}
                 <tr>
-                    <td>Иванов Иван Иванович</td>
-                    <td>2024-05-05</td>
-                    <td>52</td>
-                    <td><button class="delete-button">&times;</button></td>
+                    <td>{{ time.employee.fullname }}</td>
+                    <td>{{ time.date }}</td>
+                    <td>{{ time.amount }}</td>
+                    <td><form action="{% url 'time-tracking' %}?delete={{ time.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
