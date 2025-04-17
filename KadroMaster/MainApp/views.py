@@ -5,12 +5,19 @@ from MainApp.forms import *
 from django.db.models import Q, F, Count, Sum
 from django.http import JsonResponse
 import random, datetime
+from passlib.hash import django_pbkdf2_sha256
 
 def profile_hr(request):
-    employeers = Employees.objects.all()
     if not request.user.is_authenticated:
         return redirect("login")
-
+    
+    try:
+        if request.user.group.access_for_emplyees == 1 or request.user.is_superuser == 1:
+            employeers = Employees.objects.all()
+        else:
+            employeers = Employees.objects.filter(job__departament_id=request.user.employee.job.departament.id)
+    except:
+        employeers = Employees.objects.all()
     if request.method == 'POST':
         if request.GET.get("delete") is not None:
             Employees.objects.filter(id=request.GET.get("delete")).delete()
@@ -139,7 +146,7 @@ def get_job_titles(request):
 def time_tracking_hr(request):
     if not request.user.is_authenticated:
         return redirect("login")
-    employeers = Employees.objects.all()
+    employeers = Employees.objects.filter(job__departament_id=request.user.employee.job.departament.id)
     time_tracking = TimeTraking.objects.all()
     if request.method == 'POST':
         if 'add' in request.POST:
@@ -203,3 +210,50 @@ def salary_hr(request, id):
                 current_date = datetime.datetime.now().strftime('%Y-%m-%d')
                 Salary.objects.create(salary_date=current_date, number_of_hours_worked=employee_amount_hours, final_salary=employee_final_salary, employee=Employees.objects.filter(id=id).first())
     return render(request, 'MainApp/report_salary.html', {'salaries': salaries})
+
+def groups_admin(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    groups = Groups.objects.all().prefetch_related('user_set')
+    if request.POST:
+        if 'add' in request.POST:
+            group_new = Groups()
+            if request.POST.get('role-name') is not None:
+                group_new.title = request.POST.get('role-name')
+            if request.POST.get('personal') is not None:
+                group_new.access_for_emplyees = request.POST.get('personal')
+            if request.POST.get('department') is not None:
+                group_new.access_for_departments = request.POST.get('department')
+            if request.POST.get('job') is not None:
+                group_new.access_for_jobs = request.POST.get('job')
+            if request.POST.get('reports') is not None:
+                group_new.access_for_reports = request.POST.get('reports')
+            if request.POST.get('time') is not None:
+                group_new.access_for_time = request.POST.get('time')
+            group_new.save()
+        elif 'delete' in request.GET:
+            Groups.objects.filter(id=request.GET.get("delete")).delete()
+            return redirect("groups")
+    return render(request, 'MainApp/groups_for_users.html', {'groups': groups})
+
+def users_admin(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+    groups = Groups.objects.all()
+    employees = Employees.objects.all()
+    users = User.objects.all()
+    if request.POST:
+        if 'create_user' in request.POST:
+            user_new = User()
+            user_new.password = django_pbkdf2_sha256.hash(request.POST.get('password'), rounds=320000)
+            user_new.username = Employees.objects.filter(id=request.POST.get('employee')).first().fullname
+            user_new.group = Groups.objects.filter(id=request.POST.get('role')).first()
+            user_new.employee = Employees.objects.filter(id=request.POST.get('employee')).first()
+            try:
+                user_new.save()
+            except:
+                pass
+        elif 'delete' in request.GET:
+            User.objects.filter(id=request.GET.get("delete")).delete()
+            return redirect("users")
+    return render(request, 'MainApp/add_user.html', {'groups': groups, 'employees': employees, 'users': users})

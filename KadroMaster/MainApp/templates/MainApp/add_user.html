@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание пользователей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header {
+            background-color: #FFB300;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .header .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .user-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .form-actions button {
+            padding: 10px 20px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .form-actions button:hover {
+            background-color: #E59400;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            background-color: #e0e0e0;
+        }
+        .logout {
+            background-color: #FFB300;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .logout:hover {
+            background-color: #E59400;
+        }
+        .delete-btn {
+            padding: 5px 10px;
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu">
+            <label>КадроМастер</label>
+            <a href="{% url 'profile' %}">Назад</a>
+        </div>
+        <form method="post" action="{% url 'logout' %}?next=/">
+            {{ user.username }}
+            {% csrf_token %}
+            <button class="logout" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="container">
+        <div class="user-form">
+            <h2>Создать нового пользователя</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Сотрудник:</label>
+                        <select id="role" name="employee" required>
+                            <option value="" disabled selected>Сотрудник</option>
+                            {% for employee in employees %}
+                            <option value="{{ employee.id }}">{{ employee.fullname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Пароль:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="role">Роль:</label>
+                        <select id="role" name="role" required>
+                            <option value="" disabled selected>Выберите роль</option>
+                            {% for group in groups %}
+                            <option value="{{ group.id }}">{{ group.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" name="create_user">Создать пользователя</button>
+                </div>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Роль</th>
+                    <th>Дата создания</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    {% if user.is_superuser == 1 %}
+                    <td>Superadmin</td>
+                    {% else %}
+                    <td>{{ user.group.title }}</td>
+                    {% endif %}
+                    <td>{{ user.date_joined|date:"d.m.Y" }}</td>
+                    <td>
+                        <form action="{% url 'users' %}?delete={{ user.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

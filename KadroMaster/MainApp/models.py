@@ -2,9 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinLengthValidator
 
-class User(AbstractUser):
-    password = models.CharField(("password"), max_length=128)
-    username = models.CharField(max_length=150, unique=True)
+class Groups(models.Model):
+    title = models.CharField(max_length=150)
+    access_for_emplyees = models.IntegerField(default=0)
+    access_for_departments = models.IntegerField(default=0)
+    access_for_jobs = models.IntegerField(default=0)
+    access_for_reports = models.IntegerField(default=0)
+    access_for_time = models.IntegerField(default=0)
 
 class Departments(models.Model):
     title = models.CharField(max_length=150, unique=True)
@@ -35,6 +39,12 @@ class Employees(models.Model):
     work_book_number = models.CharField(max_length=7, validators=[MinLengthValidator(7)])
     military_ticket = models.CharField(max_length=7, validators=[MinLengthValidator(7)], null=True)
     job = models.ForeignKey(Jobs, on_delete=models.DO_NOTHING)
+
+class User(AbstractUser):
+    password = models.CharField(("password"), max_length=128)
+    username = models.CharField(max_length=150, unique=True)
+    group = models.ForeignKey(Groups, on_delete=models.DO_NOTHING, null=True)
+    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING, null=True)
 
 class TimeTraking(models.Model):
     date = models.DateField()

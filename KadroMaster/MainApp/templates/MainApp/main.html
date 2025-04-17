@@ -105,11 +105,22 @@
     <div class="header">
         <div class="menu">
             <label>КадроМастер</label>
+            {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
             <a href="{% url 'personal' %}">Добавить сотрудника</a>
+            {% endif %}
+            {% if user.group.access_for_departments == 1 or user.is_superuser == 1 %}
             <a href="{% url 'department' %}">Отделы</a>
+            {% endif %}
+            {% if user.group.access_for_jobs == 1 or user.is_superuser == 1 %}
             <a href="{% url 'job' %}">Должности</a>
-            <a href="">Управление доступами</a>
+            {% endif %}
+            {% if user.is_superuser == 0 or user.group.access_for_time %}
             <a href="{% url 'time-tracking' %}">Учет времени</a>
+            {% endif %}
+            {% if user.is_superuser == 1 %}         
+            <a href="{% url 'groups' %}">Группы пользователей</a>
+            <a href="{% url 'users' %}">Создание пользователей</a>
+            {% endif %}
             <a href="{% url 'password' %}">Смена пароля</a>
         </div>
         <form method="post" action="{% url 'logout' %}?next=/">
@@ -134,9 +145,15 @@
                     <th>Дата рождения</th>
                     <th>Телефон</th>
                     <th>Дата приёма</th>
+                    {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <th>Информация</th>
+                    {% endif %}
+                    {% if user.group.access_for_reports == 1 or user.is_superuser == 1 %}
                     <th>Отчёт ЗП</th>
+                    {% endif %}
+                    {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <th>Увольнение</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -152,9 +169,15 @@
                     <td>{{ employeer.birthday }}</td>
                     <td>{{ employeer.phone }}</td>
                     <td>{{ employeer.employment_date }}</td>
+                    {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <td><form action="{% url 'info-personal' id=employeer.id %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
+                    {% endif %}
+                    {% if user.group.access_for_reports == 1 or user.is_superuser == 1 %}
                     <td><form action="{% url 'salary' id=employeer.id %}" method="post">{% csrf_token %}<button type="submit">Отчёт ЗП</button></form></td>
+                    {% endif %}
+                    {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <td><form action="{% url 'profile' %}?delete={{ employeer.id }}" method="post">{% csrf_token %}<button type="submit">Уволить</button></form></td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

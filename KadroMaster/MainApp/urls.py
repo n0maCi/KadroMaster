@@ -14,4 +14,6 @@ urlpatterns = [
     path('time-tracking/', time_tracking_hr, name="time-tracking"),
     path('info-personal/<id>/', info_personal_hr, name="info-personal"),
     path('salary/<id>/', salary_hr, name="salary"),
+    path('groups/', groups_admin, name="groups"),
+    path('users/', users_admin, name="users"),
 ]
