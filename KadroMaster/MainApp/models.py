@@ -56,3 +56,8 @@ class Salary(models.Model):
     number_of_hours_worked = models.CharField(max_length=20)
     final_salary = models.DecimalField(max_digits=10, decimal_places=2)
     employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING)
+
+class AccessControl(models.Model):
+    date = models.DateTimeField()
+    state = models.CharField(max_length=100)
+    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING)

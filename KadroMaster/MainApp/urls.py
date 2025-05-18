@@ -16,4 +16,6 @@ urlpatterns = [
     path('salary/<id>/', salary_hr, name="salary"),
     path('groups/', groups_admin, name="groups"),
     path('users/', users_admin, name="users"),
+    path('stats/', stats_hr, name="stats"),
+    path('api/stats/', get_stats_employee, name='get_stats_employee'),
 ]

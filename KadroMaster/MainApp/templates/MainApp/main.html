@@ -121,6 +121,7 @@
             <a href="{% url 'groups' %}">Группы пользователей</a>
             <a href="{% url 'users' %}">Создание пользователей</a>
             {% endif %}
+            <a href="{% url 'stats' %}">Аналитика рабочего времени</a>
             <a href="{% url 'password' %}">Смена пароля</a>
         </div>
         <form method="post" action="{% url 'logout' %}?next=/">
@@ -134,6 +135,12 @@
             {% csrf_token %}
             <input type="text" name="fullname" placeholder="ФИО">
             <input type="text" name="p_number" placeholder="Таб. номер">
+            <select name="departament_id">
+                <option value="" disabled selected>Отделы</option>
+                {% for department in departments %}
+                <option value="{{ department.id }}">{{ department.title }}</option>
+                {% endfor %}
+            </select>
             <button type="submit">Найти</button>
         </form>
         <table>
@@ -143,8 +150,8 @@
                     <th>Таб номер</th>
                     <th>Пол</th>
                     <th>Дата рождения</th>
-                    <th>Телефон</th>
-                    <th>Дата приёма</th>
+                    <th>Отдел</th>
+                    <th>Должность</th>
                     {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <th>Информация</th>
                     {% endif %}
@@ -167,8 +174,8 @@
                     <td>Женщина</td>
                     {% endif %}
                     <td>{{ employeer.birthday }}</td>
-                    <td>{{ employeer.phone }}</td>
-                    <td>{{ employeer.employment_date }}</td>
+                    <td>{{ employeer.job.departament.title }}</td>
+                    <td>{{ employeer.job.title }}</td>
                     {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
                     <td><form action="{% url 'info-personal' id=employeer.id %}" method="post">{% csrf_token %}<button type="submit">Инфо</button></form></td>
                     {% endif %}

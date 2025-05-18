@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика посещений</title>
+    <style>
+        /* Ваши стили остаются без изменений */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        .header {
+            background-color: #FFB300;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .menu {
+            display: flex;
+            gap: 20px;
+        }
+        .header .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        select, input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFB300;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #E59400;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+        }
+        .logout {
+            background-color: #FFB300;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .logout:hover {
+            background-color: #E59400;
+        }
+        .highlight {
+            background-color: #fffde7;
+        }
+        .warning {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,179,0,.3);
+            border-radius: 50%;
+            border-top-color: #FFB300;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="menu">
+            <label>КадроМастер</label>
+            <a href="{% url 'profile' %}">Назад</a>
+        </div>
+        <form method="post" action="{% url 'logout' %}?next=/">
+            {{ user.username }}
+            {% csrf_token %}
+            <button class="logout" type="submit">Выйти</button>
+        </form>
+    </div>
+    <div class="container">
+        <form class="controls" method="post">
+            {% csrf_token %}
+            <select name="department" id="department-select" required>
+                <option value="" disabled selected>Выберите отдел</option>
+                {% for department in departments %}
+                <option value="{{ department.id }}">{{ department.title }}</option>
+                {% endfor %}
+            </select>
+            <select name="month" id="month-select" required>
+                <option value="" disabled selected>Выберите месяц</option>
+                {% for month in months %}
+                <option value="{{ month.id }}">{{ month.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="year" id="year-select">
+                <option value="2025" selected>2025</option>
+            </select>
+            <button id="generate-report" name="find">Сформировать отчет</button>
+            <button id="export-excel" type="button">Экспорт в Excel</button>
+        </form>
+        <div class="summary">
+            <h3>{{ department.title }}</h3>
+            <p>{{ month }} 2025</p>
+            <p>Общее рабочее время за месяц: {{ hours }} часов</p>
+            <p><b>Примечание:</b> Колонка "Всего за месяц" учитывает время зафиксированное системой СКУД</p>
+        </div>
+        <table id="attendance-table">
+            <thead>
+                <tr>
+                    <th>ФИО сотрудника</th>
+                    <th>Должность</th>
+                    <th>Всего за месяц</th>
+                    <th>Количество опозданий</th>
+                    <th>Количество ранних уходов</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                <tr data-employee-id="{{ employee.id }}">
+                    <td>{{ employee.fullname }}</td>
+                    <td>{{ employee.job_title }}</td>
+                    <td class="{{ employee.warning_var }}">{{ employee.total_time }}</td>
+                    <td class="warning">{{ employee.total_late }}</td>
+                    <td class="warning">{{ employee.total_early }}</td>
+                    <td>
+                        <button class="detail-btn" 
+                                data-employee-id="{{ employee.id }}">
+                            Подробно
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="employee-details" style="display: none; margin-top: 30px;">
+            <h3>Подробная информация по сотруднику: <span id="employee-name"></span></h3>
+            <div class="employee-info">
+                <p><strong>Подразделение:</strong> <span id="employee-department"></span></p>
+                <p><strong>Должность:</strong> <span id="employee-position"></span></p>
+                <p><strong>График работы:</strong> <span id="employee-schedule">09:00 - 18:00</span></p>
+            </div>
+            <div id="loading-indicator" style="display: none; text-align: center; padding: 20px;">
+                <div class="loading"></div>
+                <p>Загрузка данных...</p>
+            </div>
+            <table id="detailed-attendance">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Зачтённое время</th>
+                        <th>Первый вход</th>
+                        <th>Последний выход</th>
+                        <th>Опоздание</th>
+                        <th>Преждевременный уход</th>
+                    </tr>
+                </thead>
+                <tbody id="detailed-attendance-body">
+                    <!-- Данные будут загружаться динамически -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Обработка выбора отдела
+            const departmentSelect = document.getElementById('department-select');
+            const generateBtn = document.getElementById('generate-report');
+
+            generateBtn.addEventListener('click', function () {
+                const departmentId = departmentSelect.value;
+                const month = document.getElementById('month-select').value;
+                const year = document.getElementById('year-select').value;
+
+                if (!departmentId) {
+                    alert('Пожалуйста, выберите отдел');
+                    return;
+                }
+
+                console.log(`Загрузка данных для отдела ${departmentId}, ${month}.${year}`);
+            });
+
+            // Кнопка "Подробно"
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('detail-btn')) {
+                    const button = e.target;
+                    const employeeId = button.getAttribute('data-employee-id');
+
+                    // Получаем месяц и год из блока .summary
+                    const summaryText = document.querySelector('.summary p').textContent.trim();
+                    const [monthName, year] = summaryText.split(' '); // Например: "Апрель 2025"
+
+                    // Перевод названия месяца в числовой формат
+                    const monthMap = {
+                        'Январь': '1',
+                        'Февраль': '2',
+                        'Март': '3',
+                        'Апрель': '4',
+                        'Май': '5',
+                        'Июнь': '6',
+                        'Июль': '7',
+                        'Август': '8',
+                        'Сентябрь': '9',
+                        'Октябрь': '10',
+                        'Ноябрь': '11',
+                        'Декабрь': '12'
+                    };
+
+                    const monthNumber = monthMap[monthName];
+
+                    // Проверяем все данные
+                    if (!employeeId || !monthNumber || !year) {
+                        console.error('Не хватает параметров для запроса:', { employeeId, monthName, monthNumber, year });
+                        alert('Ошибка: недостаточно данных для запроса');
+                        return;
+                    }
+
+                    // Показываем детали сотрудника и индикатор загрузки
+                    const detailsSection = document.getElementById('employee-details');
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    const detailedTableBody = document.getElementById('detailed-attendance-body');
+
+                    detailsSection.style.display = 'block';
+                    loadingIndicator.style.display = 'block';
+                    detailedTableBody.innerHTML = '';
+
+                    // Получаем имя сотрудника и должность из таблицы
+                    const row = button.closest('tr');
+                    const employeeName = row.querySelector('td:first-child').textContent;
+                    const employeePosition = row.querySelector('td:nth-child(2)').textContent;
+                    const employeeDepartment = document.querySelector('.summary h3').textContent;
+
+                    document.getElementById('employee-name').textContent = employeeName;
+                    document.getElementById('employee-position').textContent = employeePosition;
+                    document.getElementById('employee-department').textContent = employeeDepartment;
+
+                    // Формируем URL для API
+                    const apiUrl = `/api/stats/?employee=${employeeId}&year=${year}&month=${monthNumber}`;
+                    console.log('Запрос к API:', apiUrl);
+
+                    // Загружаем данные
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.json();
+                        })
+                        .then(data => {
+                            loadingIndicator.style.display = 'none';
+
+                            if (!data || !data.attendance_data) {
+                                throw new Error('Неверный формат данных от сервера');
+                            }
+
+                            const attendanceData = data.attendance_data;
+                            const tableBody = document.getElementById('detailed-attendance-body');
+
+                            if (attendanceData.length === 0) {
+                                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Нет данных о посещениях за выбранный период</td></tr>';
+                                return;
+                            }
+
+                            attendanceData.forEach(day => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${day.date}</td>
+                                    <td>${day.work_duration}</td>
+                                    <td>${day.first_entry}</td>
+                                    <td>${day.last_exit}</td>
+                                    <td class="${day.is_late ? 'warning' : ''}">${day.is_late ? 'Да' : 'Нет'}</td>
+                                    <td class="${day.is_early_exit ? 'warning' : ''}">${day.is_early_exit ? 'Да' : 'Нет'}</td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        })
+                        .catch(error => {
+                            loadingIndicator.style.display = 'none';
+                            console.error('Ошибка при загрузке данных:', error);
+                            const tableBody = document.getElementById('detailed-attendance-body');
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: #d32f2f;">
+                                        Ошибка при загрузке данных: ${error.message}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                    // Прокрутка к деталям
+                    detailsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            // Экспорт в Excel
+            document.getElementById('export-excel').addEventListener('click', function () {
+                console.log('Экспорт данных в Excel');
+                // Здесь будет код для экспорта данных
+            });
+        });
+    </script>
+</body>
+</html>
