@@ -155,7 +155,7 @@ def time_tracking_hr(request):
     if not request.user.is_authenticated:
         return redirect("login")
     employeers = Employees.objects.filter(job__departament_id=request.user.employee.job.departament.id)
-    time_tracking = TimeTraking.objects.all()
+    time_tracking = TimeTraking.objects.filter(employee__job__departament_id=request.user.employee.job.departament.id)
     if request.method == 'POST':
         if 'add' in request.POST:
             time_tracking_new = TimeTraking()

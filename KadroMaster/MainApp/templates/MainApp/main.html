@@ -131,6 +131,7 @@
         </form>
     </div>
     <div class="container">
+        {% if user.group.access_for_emplyees == 1 or user.is_superuser == 1 %}
         <form class="search-box" method="post">
             {% csrf_token %}
             <input type="text" name="fullname" placeholder="ФИО">
@@ -143,6 +144,7 @@
             </select>
             <button type="submit">Найти</button>
         </form>
+        {% endif %}
         <table>
             <thead>
                 <tr>
