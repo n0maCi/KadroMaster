@@ -44,20 +44,20 @@ class User(AbstractUser):
     password = models.CharField(("password"), max_length=128)
     username = models.CharField(max_length=150, unique=True)
     group = models.ForeignKey(Groups, on_delete=models.DO_NOTHING, null=True)
-    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING, null=True)
+    employee = models.ForeignKey(Employees, on_delete=models.CASCADE, null=True)
 
 class TimeTraking(models.Model):
     date = models.DateField()
     amount = models.IntegerField()
-    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING)
+    employee = models.ForeignKey(Employees, on_delete=models.CASCADE)
 
 class Salary(models.Model):
     salary_date = models.DateField()
     number_of_hours_worked = models.CharField(max_length=20)
     final_salary = models.DecimalField(max_digits=10, decimal_places=2)
-    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING)
+    employee = models.ForeignKey(Employees, on_delete=models.CASCADE)
 
 class AccessControl(models.Model):
     date = models.DateTimeField()
     state = models.CharField(max_length=100)
-    employee = models.ForeignKey(Employees, on_delete=models.DO_NOTHING)
+    employee = models.ForeignKey(Employees, on_delete=models.CASCADE)

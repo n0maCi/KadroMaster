@@ -110,7 +110,10 @@ def job_hr(request):
             filter_params = {k: v for k, v in filter_params.items() if v is not None}
             jobs = Jobs.objects.filter(**filter_params).prefetch_related('employees_set')
         elif 'delete' in request.GET:
-            Jobs.objects.filter(Q(id=request.GET.get("delete"))).delete()
+            try:
+                Jobs.objects.filter(Q(id=request.GET.get("delete"))).delete()
+            except:
+                return render(request, 'MainApp/job.html', {'departments': departments, 'jobs': jobs, 'error': 'Необходимо уволить всех сотрудников на должности'})
     return render(request, 'MainApp/job.html', {'departments': departments, 'jobs': jobs})
 
 def password_hr(request):
@@ -215,7 +218,7 @@ def salary_hr(request, id):
                 employee_salary_hour = Employees.objects.filter(id=id).first().job.salary_per_hour
                 employee_amount_hours = TimeTraking.objects.filter(employee=id, date__range=(request.POST.get('from'), request.POST.get('before'))).aggregate(Sum('amount'))['amount__sum']
                 employee_final_salary = employee_salary_hour * employee_amount_hours
-                current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+                current_date = datetime.now().strftime('%Y-%m-%d')
                 Salary.objects.create(salary_date=current_date, number_of_hours_worked=employee_amount_hours, final_salary=employee_final_salary, employee=Employees.objects.filter(id=id).first())
     return render(request, 'MainApp/report_salary.html', {'salaries': salaries})
 
@@ -240,8 +243,11 @@ def groups_admin(request):
                 group_new.access_for_time = request.POST.get('time')
             group_new.save()
         elif 'delete' in request.GET:
-            Groups.objects.filter(id=request.GET.get("delete")).delete()
-            return redirect("groups")
+            try:
+                Groups.objects.filter(id=request.GET.get("delete")).delete()
+                return redirect("groups")
+            except:
+                return render(request, 'MainApp/groups_for_users.html', {'groups': groups, 'error': 'Необходимо удалить всех пользователей из группы'})
     return render(request, 'MainApp/groups_for_users.html', {'groups': groups})
 
 def users_admin(request):
