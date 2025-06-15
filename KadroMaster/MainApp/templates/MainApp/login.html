@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Авторизация</title>
+
+    <!-- Подключение jQuery и Select2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +33,7 @@
             margin-bottom: 20px;
             color: #333;
         }
-        .login-container select, .login-container input {
+        .login-container select {
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
@@ -35,12 +41,29 @@
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
+            background-color: #fff;
         }
-        .login-container select {
-            background-color: #FFF;
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px; /* добавлен отступ сверху */
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #fff;
         }
         .login-container input {
             background-color: #FFF;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            padding: 6px 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
         }
         .login-container button {
             width: 100%;
@@ -62,15 +85,38 @@
     <form class="login-container" method="post">
         {% csrf_token %}
         <h2>Авторизация</h2>
-        <select name="username">
+
+        <!-- Select2 выпадающий список с поиском -->
+        <select name="username" id="user-select" required>
             <option value disabled selected>Сотрудник</option>
             {% for user in users %}
-            <option>{{ user.username }}</option>
+            <option value="{{ user.username }}">{{ user.username }}</option>
             {% endfor %}
         </select>
-        <input type="password" placeholder="Пароль" name="password">
+
+        <!-- Поле пароля -->
+        <input type="password" name="password" placeholder="Пароль" required>
+
+        <!-- Кнопка входа -->
         <button type="submit">Войти</button>
+
+        <!-- Ошибка -->
         {{ error_message }}
     </form>
+
+    <!-- Инициализация Select2 -->
+    <script>
+        $(document).ready(function() {
+            $('#user-select').select2({
+                placeholder: "Выберите сотрудника",
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Совпадений не найдено";
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

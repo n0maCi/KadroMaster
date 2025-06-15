@@ -158,7 +158,7 @@ def time_tracking_hr(request):
     if not request.user.is_authenticated:
         return redirect("login")
     employeers = Employees.objects.filter(job__departament_id=request.user.employee.job.departament.id)
-    time_tracking = TimeTraking.objects.filter(employee__job__departament_id=request.user.employee.job.departament.id)
+    time_tracking = TimeTraking.objects.filter(employee__job__departament_id=request.user.employee.job.departament.id).order_by('-date')
     if request.method == 'POST':
         if 'add' in request.POST:
             time_tracking_new = TimeTraking()
@@ -176,7 +176,7 @@ def time_tracking_hr(request):
             'employee_id': request.POST.get('employee'),
             }
             filter_params = {k: v for k, v in filter_params.items() if v is not None and v != ''}
-            time_tracking = TimeTraking.objects.filter(**filter_params)
+            time_tracking = TimeTraking.objects.filter(**filter_params).filter(employee__job__departament_id=request.user.employee.job.departament.id).order_by('-date')
         elif 'delete' in request.GET:
             TimeTraking.objects.filter(id=request.GET.get("delete")).delete()
     return render(request, 'MainApp/time_tracking.html', {'employeers': employeers, 'time_tracking': time_tracking})

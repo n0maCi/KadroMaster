@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Учет рабочего времени</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -72,19 +72,16 @@
         .table th {
             background-color: #f0f0f0;
         }
-        .delete-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: red;
-            font-size: 18px;
-        }
         .header .menu a {
             color: white;
             text-decoration: none;
             font-weight: bold;
             padding: 15px;
             gap: 20px;
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -100,6 +97,7 @@
             <button class="logout" type="submit">Выйти</button>
         </form>
     </div>
+
     <div class="container">
         <form class="form-box" method="post">
             {% csrf_token %}
@@ -109,11 +107,12 @@
                 <option value="{{ employee.id }}">{{ employee.fullname }}</option>
                 {% endfor %}
             </select>
-            <input type="date" placeholder="Дата" name="date">
-            <input type="number" placeholder="Кол-во часов" name="amount">
+            <input type="date" name="date">
+            <input type="number" name="amount" placeholder="Кол-во часов">
             <button class="submit-button" name="find">Найти</button>
             <button class="submit-button" name="add">Добавить</button>
         </form>
+
         <table class="table">
             <thead>
                 <tr>
@@ -123,17 +122,64 @@
                     <th>Действие</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for time in time_tracking %}
-                <tr>
-                    <td>{{ time.employee.fullname }}</td>
-                    <td>{{ time.date }}</td>
-                    <td>{{ time.amount }}</td>
-                    <td><form action="{% url 'time-tracking' %}?delete={{ time.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form></td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="table-body"></tbody>
         </table>
+
+        <div class="center">
+            <button id="load-more" class="submit-button">Показать ещё</button>
+        </div>
+
+        <!-- Храним данные в JSON -->
+        <script>
+            const timeTrackingData = [
+                {% for time in time_tracking %}
+                {
+                    fullname: "{{ time.employee.fullname|escapejs }}",
+                    date: "{{ time.date }}",
+                    amount: "{{ time.amount }}",
+                    id: "{{ time.id }}"
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+        </script>
+
+        <!-- JavaScript для отрисовки по кнопке -->
+        <script>
+            let offset = 0;
+            const limit = 10;
+
+            function renderRows() {
+                const tbody = document.getElementById('table-body');
+                const end = offset + limit;
+                const rows = timeTrackingData.slice(offset, end);
+
+                rows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.fullname}</td>
+                        <td>${row.date}</td>
+                        <td>${row.amount}</td>
+                        <td>
+                            <form action="?delete=${row.id}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">Удалить</button>
+                            </form>
+                        </td>`;
+                    tbody.appendChild(tr);
+                });
+
+                offset += limit;
+
+                if (offset >= timeTrackingData.length) {
+                    document.getElementById('load-more').style.display = 'none';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                renderRows();
+                document.getElementById('load-more').addEventListener('click', renderRows);
+            });
+        </script>
     </div>
 </body>
 </html>
