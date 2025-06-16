@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создание пользователей</title>
+
+    <!-- Подключение jQuery и Select2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -118,6 +124,13 @@
         .delete-btn:hover {
             background-color: #cc0000;
         }
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            padding: 6px 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -132,6 +145,7 @@
             <button class="logout" type="submit">Выйти</button>
         </form>
     </div>
+
     <div class="container">
         <div class="user-form">
             <h2>Создать нового пользователя</h2>
@@ -139,8 +153,8 @@
                 {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="username">Сотрудник:</label>
-                        <select id="role" name="employee" required>
+                        <label for="employee">Сотрудник:</label>
+                        <select id="employee" name="employee" required>
                             <option value="" disabled selected>Сотрудник</option>
                             {% for employee in employees %}
                             <option value="{{ employee.id }}">{{ employee.fullname }}</option>
@@ -152,7 +166,7 @@
                         <input type="password" id="password" name="password" required>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="role">Роль:</label>
@@ -164,7 +178,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="submit" name="create_user">Создать пользователя</button>
                 </div>
@@ -191,12 +205,29 @@
                     {% endif %}
                     <td>{{ user.date_joined|date:"d.m.Y" }}</td>
                     <td>
-                        <form action="{% url 'users' %}?delete={{ user.id }}" method="post">{% csrf_token %}<button type="submit">Удалить</button></form>
+                        <form action="{% url 'users' %}?delete={{ user.id }}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Удалить</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#employee').select2({
+                placeholder: "Выберите сотрудника",
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Совпадений не найдено";
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
